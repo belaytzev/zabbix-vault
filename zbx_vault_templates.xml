@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-07-14T18:57:55Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template App HashiCorp Vault</template>
+            <name>Template App HashiCorp Vault</name>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>HashiCorp Vault</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Vault Health Check</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>vault.healthcheck[{$VAULT_URL}]</key>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <applications>
+                        <application>
+                            <name>HashiCorp Vault</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{last(#5)}&lt;&gt;200</expression>
+                            <name>Vault not initialized or unsealed</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Vault Discovery Accessors</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>vault.discovery-keys[{$VAULT_URL},{$VAULT_TOKEN}]</key>
+                    <delay>1h</delay>
+                    <lifetime>7d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Display name for accessor ({#VAULT_ACCESSORS})</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>vault.lookup-accessor.display_name[&quot;{$VAULT_URL}&quot;,&quot;{$VAULT_TOKEN}&quot;,&quot;{#VAULT_ACCESSORS}&quot;]</key>
+                            <delay>1h</delay>
+                            <history>30d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>HashiCorp Vault</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Expire Time for accessor ({#VAULT_ACCESSORS})</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>vault.lookup-accessor.expire_time[&quot;{$VAULT_URL}&quot;,&quot;{$VAULT_TOKEN}&quot;,&quot;{#VAULT_ACCESSORS}&quot;]</key>
+                            <delay>1h</delay>
+                            <history>30d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <applications>
+                                <application>
+                                    <name>HashiCorp Vault</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{now()}&lt;=2592000</expression>
+                                    <name>Vault token for accessor ({#VAULT_ACCESSORS}) expire time less a month</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#VAULT_ACCESSORS}</lld_macro>
+                            <path>$.accessors</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$VAULT_URL}</macro>
+                    <value>http://127.0.0.1:8100</value>
+                    <description>Vault URL</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
