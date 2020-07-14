@@ -1,8 +1,8 @@
 # Zabbix monitoring for HashiCorp Vault 
 
 ## Features
-* health and sealed
-* token expiration time
+* monitoring health and sealed
+* monitoring token expiration time
 
 ## Macros
 
