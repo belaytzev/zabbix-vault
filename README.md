@@ -4,6 +4,10 @@
 * monitoring health and sealed
 * monitoring token expiration time
 
+## Requirements
+* curl
+* jq
+
 ## Macros
 
 * VAULT_URL - full url to Vault (http://localhost:8200)
