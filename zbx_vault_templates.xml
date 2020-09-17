@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2020-07-14T18:57:55Z</date>
+    <date>2020-09-17T19:49:53Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -24,7 +24,6 @@
             <items>
                 <item>
                     <name>Vault Health Check</name>
-                    <type>ZABBIX_ACTIVE</type>
                     <key>vault.healthcheck[{$VAULT_URL}]</key>
                     <trends>0</trends>
                     <value_type>FLOAT</value_type>
@@ -35,9 +34,38 @@
                     </applications>
                     <triggers>
                         <trigger>
-                            <expression>{last(#5)}&lt;&gt;200</expression>
-                            <name>Vault not initialized or unsealed</name>
-                            <priority>AVERAGE</priority>
+                            <expression>{count(#3,200,ne)}&gt;=2 and {count(#3,429,ne)}&gt;=2</expression>
+                            <name>Vault is not correct http code {HOST.NAME}</name>
+                            <priority>HIGH</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Vault is not initialized on {HOST.NAME}</name>
+                                    <expression>{Template App HashiCorp Vault:vault.healthcheck[{$VAULT_URL}].count(#3,501,eq)}&gt;=2</expression>
+                                </dependency>
+                                <dependency>
+                                    <name>Vault is sealed on {HOST.NAME}</name>
+                                    <expression>{Template App HashiCorp Vault:vault.healthcheck[{$VAULT_URL}].count(#3,503,eq)}&gt;=2</expression>
+                                </dependency>
+                                <dependency>
+                                    <name>Vault performance to standby mode on {HOST.NAME}</name>
+                                    <expression>{Template App HashiCorp Vault:vault.healthcheck[{$VAULT_URL}].count(#3,473,eq)}&gt;=2</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                        <trigger>
+                            <expression>{count(#3,501,eq)}&gt;=2</expression>
+                            <name>Vault is not initialized on {HOST.NAME}</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{count(#3,503,eq)}&gt;=2</expression>
+                            <name>Vault is sealed on {HOST.NAME}</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{count(#3,473,eq)}&gt;=2</expression>
+                            <name>Vault performance to standby mode on {HOST.NAME}</name>
+                            <priority>INFO</priority>
                         </trigger>
                     </triggers>
                 </item>
@@ -45,14 +73,12 @@
             <discovery_rules>
                 <discovery_rule>
                     <name>Vault Discovery Accessors</name>
-                    <type>ZABBIX_ACTIVE</type>
                     <key>vault.discovery-keys[{$VAULT_URL},{$VAULT_TOKEN}]</key>
                     <delay>1h</delay>
                     <lifetime>7d</lifetime>
                     <item_prototypes>
                         <item_prototype>
                             <name>Display name for accessor ({#VAULT_ACCESSORS})</name>
-                            <type>ZABBIX_ACTIVE</type>
                             <key>vault.lookup-accessor.display_name[&quot;{$VAULT_URL}&quot;,&quot;{$VAULT_TOKEN}&quot;,&quot;{#VAULT_ACCESSORS}&quot;]</key>
                             <delay>1h</delay>
                             <history>30d</history>
@@ -66,7 +92,6 @@
                         </item_prototype>
                         <item_prototype>
                             <name>Expire Time for accessor ({#VAULT_ACCESSORS})</name>
-                            <type>ZABBIX_ACTIVE</type>
                             <key>vault.lookup-accessor.expire_time[&quot;{$VAULT_URL}&quot;,&quot;{$VAULT_TOKEN}&quot;,&quot;{#VAULT_ACCESSORS}&quot;]</key>
                             <delay>1h</delay>
                             <history>30d</history>
